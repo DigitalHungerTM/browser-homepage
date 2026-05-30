@@ -36,6 +36,12 @@ const SEARCH_ENGINES = [
     label: "Kenteken Check",
     searchUrl: "https://www.kentekencheck.nl/bruh/%s",
   },
+  {
+    id: "apple-music-artwork",
+    label: "Apple Music Artwork",
+    searchUrl:
+      "https://bendodson.com/projects/apple-music-artwork-finder/?query=%s&storefront=us",
+  },
 ];
 
 // Automatich color scheme
