@@ -12,6 +12,11 @@ const SEARCH_ENGINES = [
     searchUrl: "https://www.google.com/search?q=%s",
   },
   {
+    id: "youtube",
+    label: "Youtube",
+    searchUrl: "https://www.youtube.com/results?search_query=%s",
+  },
+  {
     id: "protondb",
     label: "ProntonDB",
     searchUrl: "https://www.protondb.com/search?q=%s",
