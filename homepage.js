@@ -66,16 +66,15 @@ $(() => {
   $("title").text(PAGE_TITLE);
   $("#title").text(PAGE_TITLE);
 
+  const list = $("#engines");
   const skeleton = $("#row-skeleton");
-
-  let prev = undefined;
 
   for (const searchEngine of SEARCH_ENGINES) {
     // generate the form for this search engine
     const row = skeleton.clone();
     row.attr("id", `row-${searchEngine.id}`);
     const form = row.find("form");
-    form.attr("id", `form-${searchEngine}`);
+    form.attr("id", `form-${searchEngine.id}`);
     form.find("input").attr("id", `input-${searchEngine.id}`);
     form.find("label").attr("for", `input-${searchEngine.id}`);
     form.find("label").find("h5").append(searchEngine.label);
@@ -100,14 +99,12 @@ $(() => {
     });
 
     // append search engine to the end of the list
-    if (prev) {
-      prev.after(row);
-    } else {
-      skeleton.after(row);
-    }
-    prev = row;
+    list.append(row);
   }
 
   // remove the skeleton
   skeleton.remove();
+
+  // autofocus first engine
+  list.children().first().find("input").trigger("focus");
 });
