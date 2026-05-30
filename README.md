@@ -19,3 +19,7 @@ git clone https://github.com/DigitalHungerTM/browser-homepage.git
   `Settings` -> `Home` -> `Homepage and new windows` -> Select `custom URL` and paste the URL you copied
 
 5. Click the home button in firefox and enjoy!
+
+## Screenshot
+
+![screenshot](images/screenshot.png)
