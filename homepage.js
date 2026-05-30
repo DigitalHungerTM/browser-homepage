@@ -41,15 +41,19 @@ const DB_NAME = "engines";
  * @type {IDBDatabase}
  */
 let db;
-{
+function openDatabase() {
+  let deferred = $.Deferred();
+
   // open a connection to the database
   const openRequest = window.indexedDB.open(DB_NAME, 1);
   openRequest.onerror = () => {
     console.error(`${DB_NAME} failed to open`);
+    deferred.reject(openRequest.error);
   };
   openRequest.onsuccess = () => {
     console.log("Database opened successfully");
     db = openRequest.result;
+    deferred.resolve(db);
   };
 
   // create the schema if it doesn't exist
@@ -64,11 +68,13 @@ let db;
     objectStore.createIndex("label", "label", { unique: false });
     objectStore.createIndex("searchUrl", "searchUrl", { unique: false });
   };
+
+  return deferred.promise();
 }
 
 /**
- * Get all engines from the database and display them on the page.
- * @param {enginesConsumer} callback A function that takes a list of
+ * Get all engines from the database
+ * @param {enginesConsumer} [callback] Callback to call on the retrieved engines.
  */
 function getEngines(callback) {
   const transaction = db.transaction([DB_NAME], "readonly");
@@ -282,7 +288,9 @@ $(() => {
   // hide the skeleton
 
   // get and render engines
-  getEngines(renderEngines);
+  openDatabase().done(() => {
+    getEngines(renderEngines);
+  });
 
   // register onSubmit with validation for the add-engine form
   const addEngineForm = $("#add-engine");
