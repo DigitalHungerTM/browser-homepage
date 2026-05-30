@@ -18,6 +18,10 @@ git clone https://github.com/DigitalHungerTM/browser-homepage.git
 
 5. Click the home button in firefox and enjoy!
 
+## Cookies settings
+
+If you have your browser set to clear cookies on exit, add the URL of this file to the list of exceptions. Since this project doesn't use a database, all added search engines are stored in localStorage. If localStorage is cleared, your added search engines will disappear. For the same reason incognito mode is not supported, since it automatically clears cookies on exit.
+
 ## Screenshot
 
 ![screenshot](images/screenshot.png)

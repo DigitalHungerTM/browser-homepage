@@ -1,6 +1,9 @@
 // Type definitions for documentation
 /**
- * @typedef {{label: string, searchUrl: string}} engine
+ * @typedef {Object} engine
+ * @property {number} [id]
+ * @property {string} label
+ * @property {string} searchUrl
  */
 
 /**
@@ -11,49 +14,6 @@
 // ---- settings
 const PAGE_TITLE = "Startpage";
 const DB_NAME = "engines";
-
-/**
- * `id` should be unique.
- * @type {engine[]}
- */
-const SEARCH_ENGINES = [
-  {
-    // id: "google",
-    label: "Google",
-    searchUrl: "https://www.google.com/search?q=%s",
-  },
-  {
-    // id: "youtube",
-    label: "Youtube",
-    searchUrl: "https://www.youtube.com/results?search_query=%s",
-  },
-  {
-    // id: "protondb",
-    label: "ProntonDB",
-    searchUrl: "https://www.protondb.com/search?q=%s",
-  },
-  {
-    // id: "howlongtobeat",
-    label: "How Long To Beat",
-    searchUrl: "https://www.howlongtobeat.com?q=%s",
-  },
-  {
-    // id: "yeggi",
-    label: "Yeggi",
-    searchUrl: "https://www.yeggi.com/q/%s",
-  },
-  {
-    // id: "kentekencheck",
-    label: "Kenteken Check",
-    searchUrl: "https://www.kentekencheck.nl/bruh/%s",
-  },
-  {
-    // id: "apple-music-artwork",
-    label: "Apple Music Artwork",
-    searchUrl:
-      "https://www.bendodson.com/projects/apple-music-artwork-finder/?query=%s&storefront=us",
-  },
-];
 
 // ---- Automatic color scheme
 {
@@ -77,6 +37,9 @@ const SEARCH_ENGINES = [
 }
 
 // ---- Database
+/**
+ * @type {IDBDatabase}
+ */
 let db;
 {
   // open a connection to the database
@@ -104,27 +67,6 @@ let db;
 }
 
 /**
- * Add a single engine to the database
- * @param {engine} engine Engine to add to the database.
- */
-function addEngineToDB(engine) {
-  const transaction = db.transaction([DB_NAME], "readwrite");
-  const objectStore = transaction.objectStore(DB_NAME);
-  transaction.onerror = () => {
-    console.error("transaction not opened due to error", transaction.error);
-  };
-  const addRequest = objectStore.add(engine);
-  addRequest.onsuccess = () => {
-    console.log(`${engine.label} successfully added to the store`);
-  };
-  addRequest.onerror = (e) => {
-    console.error(`${engine.label} could not be added to the store`, e);
-  };
-
-  getEngines(renderEngines);
-}
-
-/**
  * Get all engines from the database and display them on the page.
  * @param {enginesConsumer} callback A function that takes a list of
  */
@@ -147,6 +89,54 @@ function getEngines(callback) {
 }
 
 /**
+ * Add a single engine to the database
+ * @param {engine} engine Engine to add to the database.
+ */
+function addEngine(engine) {
+  const transaction = db.transaction([DB_NAME], "readwrite");
+  const objectStore = transaction.objectStore(DB_NAME);
+  transaction.onerror = () => {
+    console.error("transaction not opened due to error", transaction.error);
+  };
+  const addRequest = objectStore.add(engine);
+  addRequest.onsuccess = () => {
+    console.log(`${engine.label} successfully added to the database`);
+  };
+  addRequest.onerror = () => {
+    console.error(
+      `${engine.label} could not be added to the database`,
+      addRequest.error,
+    );
+  };
+}
+
+/**
+ * Remove a single engine from the database
+ * @param {engine} engine ID of the engine to remove.
+ */
+function removeEngine(engine) {
+  if (engine.id === undefined) {
+    console.warn(`${engine.label} has no ID, not removing from database`);
+    return;
+  }
+  const transaction = db.transaction([DB_NAME], "readwrite");
+  const objectStore = transaction.objectStore(DB_NAME);
+  transaction.onerror = () => {
+    console.error("transaction not opened due to error", transaction.error);
+  };
+  const removeRequest = objectStore.delete(engine.id);
+  removeRequest.onsuccess = () => {
+    console.log(`${engine.label} successfully removed from the database`);
+  };
+  removeRequest.onerror = () => {
+    console.error(
+      `${engine.label} could not be removed from the database`,
+      removeRequest.error,
+    );
+  };
+}
+
+/**
  * Renders the engines.
  * @param {engine[]} engines Engines to render.
  */
@@ -154,10 +144,12 @@ function renderEngines(engines) {
   const list = $("#engines");
 
   const skeleton = $("#engine-skeleton");
+  skeleton.siblings().remove(); // remove out of date elements
 
   for (const engine of engines) {
     // generate the form for this search engine
     const engine_el = skeleton.clone();
+
     engine_el.attr("id", `engine-${engine.id}`);
     const form = engine_el.find("form");
     form.attr("id", `form-${engine.id}`);
@@ -181,21 +173,21 @@ function renderEngines(engines) {
       const uri = engine.searchUrl.replace("%s", searchVal);
       const encoded = encodeURI(uri);
       console.log(encoded);
-      // window.location.href = encoded;
+      window.location.href = encoded;
       this.reset();
     });
 
     // register onDelete method
     form.find("button").on("click", function (e) {
       // TODO: delete this search engine from the indexedDB
-      console.warn("DELETE BUTTON CLICKED");
+      removeEngine(engine);
+      getEngines(renderEngines);
     });
 
-    // append search engine to the end of the list
+    // append search engine to the end of the list and make it visible
     list.append(engine_el);
+    engine_el.show();
   }
-  // remove the skeleton
-  skeleton.remove();
 
   // autofocus first engine
   list.children().first().find("input").trigger("focus");
@@ -208,8 +200,76 @@ function renderEngines(engines) {
  * @returns
  */
 function getFaviconUrl(url) {
-  const domain = url.match(/:\/\/(.[^/]+)/)[1];
-  return `https://favicon.yandex.net/favicon/${domain}`;
+  try {
+    const domain = url.match(/:\/\/(.[^/]+)/)[1];
+    return `https://favicon.yandex.net/favicon/${domain}`;
+  } catch {
+    return "";
+  }
+}
+
+/**
+ * Set feedback for when an input element has an invalid value.
+ * @param {*} inputElement
+ * @param {string} message The message to set, set to '' to clear the message
+ */
+function setInvalidFeedback(inputElement, message) {
+  inputElement.get(0).setCustomValidity(message);
+  inputElement.siblings(".invalid-feedback").text(message);
+}
+
+/**
+ * Checks if the new engine form is valid on submission. If invalid,
+ * sets custom validity messages.
+ * @param {*} form
+ * @returns {boolean | engine} `false` if invalid, the validated values otherwise
+ */
+function validateEngine(form) {
+  let isValid = true;
+
+  const label = form.find("#add-engine-label");
+  setInvalidFeedback(label, "");
+
+  let labelMessage = "";
+  const labelVal = label.val().trim();
+  if (!labelVal) {
+    labelMessage = "Label may not be empty";
+    isValid = false;
+  }
+
+  const searchUrl = form.find("#add-search-url");
+  setInvalidFeedback(searchUrl, "");
+
+  let searchUrlMessage = "";
+  const searchUrlVal = searchUrl.val().trim();
+  let parsedUrl;
+  try {
+    parsedUrl = new URL(searchUrlVal).toString();
+  } catch {}
+
+  if (!searchUrlVal) {
+    searchUrlMessage = "Search URL may not be empty";
+    isValid = false;
+  } else if (!parsedUrl) {
+    searchUrlMessage =
+      "Search URL must be a valid URL ('http[s]://' must be included)";
+    isValid = false;
+  } else if (!parsedUrl.includes("%s")) {
+    searchUrlMessage = "Search URL must include '%s' placeholder";
+    isValid = false;
+  }
+
+  if (!isValid) {
+    setInvalidFeedback(label, labelMessage);
+    setInvalidFeedback(searchUrl, searchUrlMessage);
+    return isValid;
+  }
+  setInvalidFeedback(label, "");
+  setInvalidFeedback(searchUrl, "");
+  return {
+    label: labelVal,
+    searchUrl: parsedUrl,
+  };
 }
 
 $(() => {
@@ -219,6 +279,27 @@ $(() => {
   $("title").text(PAGE_TITLE);
   $("#title").text(PAGE_TITLE);
 
+  // hide the skeleton
+
   // get and render engines
   getEngines(renderEngines);
+
+  // register onSubmit with validation for the add-engine form
+  const addEngineForm = $("#add-engine");
+  addEngineForm.find("input").on("input", function () {
+    validateEngine(addEngineForm);
+    addEngineForm.addClass("was-validated");
+  });
+
+  addEngineForm.on("submit", function (e) {
+    e.preventDefault();
+    if ((newEngine = validateEngine($(this)))) {
+      addEngine(newEngine);
+      getEngines(renderEngines);
+      $(this).removeClass("was-validated");
+      this.reset();
+    } else {
+      $(this).addClass("was-validated");
+    }
+  });
 });

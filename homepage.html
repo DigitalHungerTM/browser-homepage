@@ -47,23 +47,38 @@
                     <!-- add engine form -->
                     <div class="row">
                         <div class="col">
-                            <form>
+                            <form
+                                id="add-engine"
+                                class="needs-validation"
+                                autocomplete="off"
+                                novalidate
+                            >
+                                <label
+                                    for="add-engine-label"
+                                    class="form-label"
+                                >
+                                    Add a new search engine
+                                </label>
                                 <div class="row">
                                     <div class="col">
                                         <input
                                             id="add-engine-label"
                                             class="form-control"
                                             type="text"
-                                            placeholder="Engine label"
+                                            placeholder="e.g., Google"
+                                            required
                                         />
+                                        <div class="invalid-feedback"></div>
                                     </div>
                                     <div class="col-8">
                                         <input
                                             id="add-search-url"
                                             class="form-control"
-                                            type="text"
-                                            placeholder="Search URL"
+                                            type="url"
+                                            placeholder="Search URL, e.g., https://www.google.com/search?q=%s"
+                                            required
                                         />
+                                        <div class="invalid-feedback"></div>
                                     </div>
                                     <div class="col-auto">
                                         <button
@@ -78,10 +93,16 @@
                         </div>
                     </div>
 
+                    <hr />
+
                     <!-- List of engines -->
-                    <div id="engines" class="row gy-3 mt-3">
-                        <div id="engine-skeleton" class="col-12">
-                            <form id="form-skeleton">
+                    <div id="engines" class="row gy-3">
+                        <div
+                            id="engine-skeleton"
+                            class="col-12"
+                            style="display: none"
+                        >
+                            <form id="form-skeleton" autocomplete="off">
                                 <div class="row">
                                     <label
                                         id="label-skeleton"
@@ -95,6 +116,7 @@
                                             id="query-skeleton"
                                             class="form-control"
                                             type="text"
+                                            placeholder="Query"
                                         />
                                     </div>
                                     <div class="col-auto">
