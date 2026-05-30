@@ -1,8 +1,6 @@
 # Browser Homepage
 
-A simple browser homepage with a list of search engines.
-
-This exists because I thought it was a good idea to make.
+A simple browser homepage with a list of search engines. It consists of a single HTML and a single Javascript file. Bootstrap and Jquery are used for styling and dynamic rendering of the search engines. The page automatically switches between light and dark mode based on your browser's preferred theme. Search engines can be added by adding them to the `SEARCH_ENGINES` list in `homepage.js`.
 
 ## Installation (for firefox) (on unix systems)
 
