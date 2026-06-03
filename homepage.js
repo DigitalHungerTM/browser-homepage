@@ -51,7 +51,7 @@ function openDatabase() {
     deferred.reject(openRequest.error);
   };
   openRequest.onsuccess = () => {
-    console.log("Database opened successfully");
+    console.log("Database opened successfully!");
     db = openRequest.result;
     deferred.resolve(db);
   };
@@ -179,7 +179,11 @@ function renderEngines(engines) {
       const uri = engine.searchUrl.replace("%s", searchVal);
       const encoded = encodeURI(uri);
       console.log(encoded);
-      window.location.href = encoded;
+      if (getOpenInNewTab()) {
+        window.open(encoded, "_blank").focus();
+      } else {
+        window.location.href = encoded;
+      }
       this.reset();
     });
 
@@ -190,8 +194,8 @@ function renderEngines(engines) {
       getEngines(renderEngines);
     });
 
-    // append search engine to the end of the list and make it visible
-    list.append(engine_el);
+    // render the engine before the skeleton
+    skeleton.before(engine_el);
     engine_el.show();
   }
 
@@ -278,14 +282,26 @@ function validateEngine(form) {
   };
 }
 
+/**
+ * @param {boolean} val
+ */
+function setOpenInNewTab(val) {
+  localStorage.setItem("openInNewTab", val);
+}
+
+/**
+ * @returns {boolean}
+ */
+function getOpenInNewTab() {
+  return localStorage.getItem("openInNewTab") === "true";
+}
+
 $(() => {
   console.log("Document ready, jquery loaded succesfully!");
 
   // set the title of the page
   $("title").text(PAGE_TITLE);
   $("#title").text(PAGE_TITLE);
-
-  // hide the skeleton
 
   // get and render engines
   openDatabase().done(() => {
@@ -306,8 +322,14 @@ $(() => {
       getEngines(renderEngines);
       $(this).removeClass("was-validated");
       this.reset();
+      $(this).find("input").trigger("focus");
     } else {
       $(this).addClass("was-validated");
     }
   });
+
+  // handler for the 'Open result in new tab' checkbox
+  openInNewTabInput = $("#open-in-new-tab");
+  openInNewTabInput.attr("checked", getOpenInNewTab());
+  openInNewTabInput.on("input", (e) => setOpenInNewTab(e.target.checked));
 });

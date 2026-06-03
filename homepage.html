@@ -34,16 +34,35 @@
         <link rel="stylesheet" href="homepage.css" />
     </head>
     <body>
-        <div class="container-xl">
+        <!-- navbar -->
+        <nav class="navbar navbar-expand-lg bg-body-tertiary">
+            <div class="container-xl">
+                <div class="col-8 mx-auto d-flex align-items-center">
+                    <span id="title" class="navbar-brand me-4">
+                        <!-- Title will be placed here with JS -->
+                    </span>
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <input
+                                class="form-check-input"
+                                type="checkbox"
+                                value=""
+                                id="open-in-new-tab"
+                            />
+                            <label
+                                class="form-check-label"
+                                for="open-in-new-tab"
+                                >Open result in new tab</label
+                            >
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container-xl mt-3">
             <div class="row">
                 <div class="col-8 mx-auto">
-                    <!-- header -->
-                    <div class="row my-5">
-                        <div class="col text-center">
-                            <h1 id="title" class="display-1">Startpage</h1>
-                        </div>
-                    </div>
-
                     <!-- add engine form -->
                     <div class="row">
                         <div class="col">
